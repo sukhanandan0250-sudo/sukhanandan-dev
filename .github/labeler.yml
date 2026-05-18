@@ -1,0 +1,41 @@
+documentation:
+  - '**/*.md'
+  - 'docs/**/*'
+
+dependencies:
+  - 'package.json'
+  - 'package-lock.json'
+  - 'bun.lock'
+
+frontend:
+  - 'public/**/*'
+  - '**/*.html'
+  - '**/*.css'
+  - 'public/js/**/*'
+
+backend:
+  - 'src/**/*.ts'
+  - 'index.ts'
+
+services:
+  - 'src/services/**/*'
+
+routes:
+  - 'src/routes/**/*'
+
+middleware:
+  - 'src/middleware/**/*'
+
+config:
+  - 'tsconfig.json'
+  - '.env.example'
+  - '*.config.js'
+  - '*.config.ts'
+
+tests:
+  - '**/*.test.ts'
+  - '**/*.spec.ts'
+  - 'tests/**/*'
+
+ci-cd:
+  - '.github/**/*'
