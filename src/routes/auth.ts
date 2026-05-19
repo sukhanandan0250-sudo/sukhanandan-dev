@@ -1,22 +1,31 @@
 // src/routes/auth.ts
+
 import { Hono } from "hono";
 import { userDatabase } from "../services/userDatabase";
-import { setCookie, deleteCookie, getCookie } from "hono/cookie";
+import {
+  setCookie,
+  deleteCookie,
+  getCookie,
+} from "hono/cookie";
 
-const app = new Hono();
+const authRoutes = new Hono();
 
-// Register endpoint
-app.post("/register", async (c) => {
+// ======================
+// Register
+// ======================
+
+authRoutes.post("/register", async (c) => {
   try {
     const body = await c.req.json();
+
     const { email, name, password } = body;
 
-    // Validate input
+    // Validation
     if (!email || !name || !password) {
       return c.json(
         {
           success: false,
-          message: "Email, name, and password are required",
+          message: "Email, name and password are required",
         },
         400
       );
@@ -104,10 +113,14 @@ app.post("/register", async (c) => {
   }
 });
 
-// Login endpoint
-app.post("/login", async (c) => {
+// ======================
+// Login
+// ======================
+
+authRoutes.post("/login", async (c) => {
   try {
     const body = await c.req.json();
+
     const { email, password } = body;
 
     if (!email || !password) {
@@ -171,8 +184,11 @@ app.post("/login", async (c) => {
   }
 });
 
-// Logout endpoint
-app.post("/logout", async (c) => {
+// ======================
+// Logout
+// ======================
+
+authRoutes.post("/logout", async (c) => {
   try {
     const token = getCookie(c, "session_token");
 
@@ -199,8 +215,11 @@ app.post("/logout", async (c) => {
   }
 });
 
-// Check auth status
-app.get("/me", async (c) => {
+// ======================
+// Current User
+// ======================
+
+authRoutes.get("/me", async (c) => {
   try {
     const token = getCookie(c, "session_token");
 
@@ -249,4 +268,4 @@ app.get("/me", async (c) => {
   }
 });
 
-export default app;
+export default authRoutes;
