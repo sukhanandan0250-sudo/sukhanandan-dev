@@ -42,9 +42,11 @@
       "src": "/user/(.*)",
       "dest": "api/index.js"
     },
+
     {
       "handle": "filesystem"
     },
+
     {
       "src": "/(.*)",
       "dest": "/frontend/dist/index.html"
