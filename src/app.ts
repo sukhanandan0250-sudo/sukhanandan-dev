@@ -44,16 +44,16 @@ app.use(
   "*",
   cors({
     origin: "*",
-    credentials: true,
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
   })
 );
 
 app.use("*", logger());
 
 // ======================
-// Public Routes
+// Auth Protection
 // ======================
 
 app.use("*", async (c, next) => {
@@ -61,11 +61,15 @@ app.use("*", async (c, next) => {
 
   const publicPaths = [
     "/health",
-    "/auth/register",
     "/auth/login",
+    "/auth/register",
   ];
 
-  if (publicPaths.some((p) => path.startsWith(p))) {
+  const isPublic = publicPaths.some((p) =>
+    path.startsWith(p)
+  );
+
+  if (isPublic) {
     return next();
   }
 
@@ -84,7 +88,7 @@ app.route("/", configRoutes);
 app.route("/", dashboardRoutes);
 
 // ======================
-// Health Check
+// Health
 // ======================
 
 app.get("/health", (c) => {
@@ -103,7 +107,9 @@ app.get("/user/info", async (c) => {
   try {
     const token =
       c.req.header("Authorization")?.replace("Bearer ", "") ||
-      c.req.header("cookie")?.match(/session_token=([^;]+)/)?.[1];
+      c.req.header("cookie")?.match(
+        /session_token=([^;]+)/
+      )?.[1];
 
     if (!token) {
       return c.json(
@@ -115,7 +121,9 @@ app.get("/user/info", async (c) => {
       );
     }
 
-    const { userDatabase } = await import("./services/userDatabase");
+    const { userDatabase } = await import(
+      "./services/userDatabase"
+    );
 
     const user = userDatabase.validateSession(token);
 
@@ -151,14 +159,14 @@ app.get("/user/info", async (c) => {
 });
 
 // ======================
-// 404
+// Not Found
 // ======================
 
 app.notFound((c) => {
   return c.json(
     {
       success: false,
-      message: "Endpoint not found",
+      message: "Route not found",
     },
     404
   );
@@ -169,16 +177,12 @@ app.notFound((c) => {
 // ======================
 
 app.onError((err, c) => {
-  console.error("Application error:", err);
+  console.error(err);
 
   return c.json(
     {
       success: false,
       message: "Internal Server Error",
-      error:
-        process.env.NODE_ENV === "development"
-          ? err.message
-          : undefined,
     },
     500
   );
