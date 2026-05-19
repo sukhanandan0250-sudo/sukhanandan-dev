@@ -5,6 +5,7 @@ import "dotenv/config";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
+
 import { mkdir } from "fs/promises";
 import { existsSync } from "fs";
 
@@ -34,7 +35,10 @@ async function initializeDirectories() {
   }
 }
 
-initializeDirectories().catch(console.error);
+// Initialize once
+initializeDirectories().catch((err) => {
+  console.error("Directory initialization failed:", err);
+});
 
 // ======================
 // Middleware
@@ -70,10 +74,10 @@ app.use("*", async (c, next) => {
   );
 
   if (isPublic) {
-    return next();
+    return await next();
   }
 
-  return authMiddleware(c, next);
+  return await authMiddleware(c, next);
 });
 
 // ======================
@@ -88,7 +92,7 @@ app.route("/", configRoutes);
 app.route("/", dashboardRoutes);
 
 // ======================
-// Health
+// Health Route
 // ======================
 
 app.get("/health", (c) => {
@@ -146,7 +150,7 @@ app.get("/user/info", async (c) => {
       },
     });
   } catch (error) {
-    console.error(error);
+    console.error("User info error:", error);
 
     return c.json(
       {
@@ -159,7 +163,7 @@ app.get("/user/info", async (c) => {
 });
 
 // ======================
-// Not Found
+// 404 Handler
 // ======================
 
 app.notFound((c) => {
@@ -173,11 +177,11 @@ app.notFound((c) => {
 });
 
 // ======================
-// Error Handler
+// Global Error Handler
 // ======================
 
 app.onError((err, c) => {
-  console.error(err);
+  console.error("Application error:", err);
 
   return c.json(
     {
