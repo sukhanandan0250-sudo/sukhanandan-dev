@@ -49,7 +49,6 @@ export const Validators = {
     return value.length <= max ? null : (message || `Must be no more than ${max} characters`)
   },
 
-  // ✅ FIXED
   min(value: number | string, min: number, message?: string): string | null {
     if (value === null || value === undefined || value === '') return null
 
@@ -62,7 +61,6 @@ export const Validators = {
     return num >= min ? null : (message || `Must be at least ${min}`)
   },
 
-  // ✅ FIXED
   max(value: number | string, max: number, message?: string): string | null {
     if (value === null || value === undefined || value === '') return null
 

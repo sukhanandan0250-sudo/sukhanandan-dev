@@ -1,55 +1,16 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
-  "builds": [
+  "buildCommand": "npm run vercel-build",
+  "outputDirectory": "frontend/dist",
+  "rewrites": [
     {
-      "src": "api/index.js",
-      "use": "@vercel/node"
+      "source": "/(auth|config|send|report|batch-status|scheduled-jobs|dashboard|parse-excel|provider-info|health|user|test-notification|batch-pause|batch-resume|batch-cancel)(.*)",
+      "destination": "/api"
     },
     {
-      "src": "frontend/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
-    }
-  ],
-  "routes": [
-    {
-      "src": "/auth/(.*)",
-      "dest": "api/index.js"
-    },
-    {
-      "src": "/config/(.*)",
-      "dest": "api/index.js"
-    },
-    {
-      "src": "/send/(.*)",
-      "dest": "api/index.js"
-    },
-    {
-      "src": "/report/(.*)",
-      "dest": "api/index.js"
-    },
-    {
-      "src": "/dashboard/(.*)",
-      "dest": "api/index.js"
-    },
-    {
-      "src": "/health",
-      "dest": "api/index.js"
-    },
-    {
-      "src": "/user/(.*)",
-      "dest": "api/index.js"
-    },
-
-    {
-      "handle": "filesystem"
-    },
-
-    {
-      "src": "/(.*)",
-      "dest": "/frontend/dist/index.html"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }

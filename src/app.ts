@@ -5,7 +5,7 @@ import "dotenv/config";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
-
+import { serve } from "@hono/node-server";
 import { mkdir } from "fs/promises";
 import { existsSync } from "fs";
 
@@ -80,7 +80,6 @@ app.use("*", async (c, next) => {
   return await authMiddleware(c, next);
 });
 
-// ======================
 // Routes
 // ======================
 
@@ -191,5 +190,38 @@ app.onError((err, c) => {
     500
   );
 });
+
+const port = parseInt(process.env.PORT || "3000");
+
+async function main() {
+  console.log("🚀 Initializing Bulk Email Sender...");
+  await initializeDirectories();
+
+  console.log("\n📋 Configuration Status:");
+  if (process.env.SMTP_HOST) {
+    console.log("✅ Global SMTP configuration found");
+  } else {
+    console.log("⚠️  No global SMTP configuration - users configure their own");
+  }
+
+  console.log("\n🔐 Authentication: Argon2 + Session tokens");
+  console.log(`\n🌐 Server starting on port ${port}`);
+  console.log(`   API: http://localhost:${port}`);
+
+  setTimeout(async () => {
+    try {
+      const { userDatabase } = await import("./services/userDatabase");
+      userDatabase.cleanExpiredSessions();
+    } catch {}
+  }, 1000);
+
+  serve({ fetch: app.fetch, port }, (info) => {
+    console.log(`✅ Server running at http://localhost:${info.port}`);
+  });
+}
+
+if (!process.env.VERCEL) {
+  main().catch(console.error);
+}
 
 export default app;
