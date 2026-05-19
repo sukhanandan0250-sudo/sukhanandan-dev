@@ -20,7 +20,6 @@ authRoutes.post("/register", async (c) => {
 
     const { email, name, password } = body;
 
-    // Validation
     if (!email || !name || !password) {
       return c.json(
         {
@@ -41,7 +40,6 @@ authRoutes.post("/register", async (c) => {
       );
     }
 
-    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!emailRegex.test(email)) {
@@ -54,52 +52,31 @@ authRoutes.post("/register", async (c) => {
       );
     }
 
-    try {
-      const userId = await userDatabase.createUser(
+    const userId = await userDatabase.createUser(
+      email,
+      name,
+      password
+    );
+
+    const token = await userDatabase.createSession(userId);
+
+    setCookie(c, "session_token", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+      maxAge: 24 * 60 * 60,
+      path: "/",
+    });
+
+    return c.json({
+      success: true,
+      message: "Account created successfully",
+      user: {
+        id: userId,
         email,
         name,
-        password
-      );
-
-      const token = await userDatabase.createSession(userId);
-
-      const isHTTPS =
-        c.req.header("x-forwarded-proto") === "https" ||
-        c.req.url.startsWith("https://");
-
-      setCookie(c, "session_token", token, {
-        httpOnly: true,
-        secure: isHTTPS,
-        sameSite: "lax",
-        maxAge: 24 * 60 * 60,
-        path: "/",
-      });
-
-      return c.json({
-        success: true,
-        message: "Account created successfully",
-        user: {
-          id: userId,
-          email,
-          name,
-        },
-      });
-    } catch (error) {
-      if (
-        error instanceof Error &&
-        error.message === "Email already exists"
-      ) {
-        return c.json(
-          {
-            success: false,
-            message: "An account with this email already exists",
-          },
-          409
-        );
-      }
-
-      throw error;
-    }
+      },
+    });
   } catch (error) {
     console.error("Registration error:", error);
 
@@ -150,13 +127,9 @@ authRoutes.post("/login", async (c) => {
 
     const token = await userDatabase.createSession(user.id);
 
-    const isHTTPS =
-      c.req.header("x-forwarded-proto") === "https" ||
-      c.req.url.startsWith("https://");
-
     setCookie(c, "session_token", token, {
       httpOnly: true,
-      secure: isHTTPS,
+      secure: true,
       sameSite: "lax",
       maxAge: 24 * 60 * 60,
       path: "/",
@@ -165,11 +138,7 @@ authRoutes.post("/login", async (c) => {
     return c.json({
       success: true,
       message: "Login successful",
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-      },
+      user,
     });
   } catch (error) {
     console.error("Login error:", error);
@@ -203,7 +172,7 @@ authRoutes.post("/logout", async (c) => {
       message: "Logged out successfully",
     });
   } catch (error) {
-    console.error("Logout error:", error);
+    console.error(error);
 
     return c.json(
       {
@@ -236,8 +205,6 @@ authRoutes.get("/me", async (c) => {
     const user = userDatabase.validateSession(token);
 
     if (!user) {
-      deleteCookie(c, "session_token");
-
       return c.json(
         {
           success: false,
@@ -249,14 +216,10 @@ authRoutes.get("/me", async (c) => {
 
     return c.json({
       success: true,
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-      },
+      user,
     });
   } catch (error) {
-    console.error("Auth check error:", error);
+    console.error(error);
 
     return c.json(
       {

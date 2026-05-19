@@ -1,4 +1,5 @@
 // src/app.ts
+
 import "dotenv/config";
 
 import { Hono } from "hono";
@@ -22,6 +23,7 @@ const app = new Hono();
 // ======================
 // Initialize directories
 // ======================
+
 async function initializeDirectories() {
   const dirs = ["./uploads", "./logs", "./data"];
 
@@ -32,7 +34,6 @@ async function initializeDirectories() {
   }
 }
 
-// Run once
 initializeDirectories().catch(console.error);
 
 // ======================
@@ -52,32 +53,29 @@ app.use(
 app.use("*", logger());
 
 // ======================
-// Public Route Protection
+// Public Routes
 // ======================
 
 app.use("*", async (c, next) => {
   const path = c.req.path;
 
   const publicPaths = [
-    "/register",
-    "/login",
     "/health",
     "/auth/register",
     "/auth/login",
   ];
 
   if (publicPaths.some((p) => path.startsWith(p))) {
-    return await next();
+    return next();
   }
 
-  return await authMiddleware(c, next);
+  return authMiddleware(c, next);
 });
 
 // ======================
 // Routes
 // ======================
 
-// IMPORTANT FIX
 app.route("/auth", authRoutes);
 
 app.route("/", sendRoutes);
@@ -153,7 +151,7 @@ app.get("/user/info", async (c) => {
 });
 
 // ======================
-// 404 Handler
+// 404
 // ======================
 
 app.notFound((c) => {
