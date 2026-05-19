@@ -6,13 +6,14 @@ import { notificationService } from "./notificationService";
 import type { EmailJob, BatchConfig, ScheduledJob } from "../types";
 import { existsSync, mkdirSync } from "fs";
 import { dirname } from "path";
+import { getRuntimePath, isServerlessRuntime } from "../utils/runtimePaths";
 
 class SchedulerService {
   private db: Database.Database;
   private schedulerInterval: NodeJS.Timeout | null = null;
 
   constructor() {
-    const dbPath = "./data/scheduler.db";
+    const dbPath = getRuntimePath("data", "scheduler.db");
     const dbDir = dirname(dbPath);
 
     if (!existsSync(dbDir)) {
@@ -23,7 +24,9 @@ class SchedulerService {
     this.db = new Database(dbPath);
     this.db.pragma("journal_mode = WAL");
     this.initDatabase();
-    this.startScheduler();
+    if (!isServerlessRuntime()) {
+      this.startScheduler();
+    }
   }
 
   private initDatabase() {

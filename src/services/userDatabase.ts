@@ -4,6 +4,7 @@ import { existsSync, mkdirSync } from "fs";
 import { dirname } from "path";
 import { hash, verify } from "argon2";
 import { createHmac, randomBytes } from "crypto";
+import { getRuntimePath, isServerlessRuntime } from "../utils/runtimePaths";
 
 export interface User {
   id: string;
@@ -44,7 +45,7 @@ class UserDatabase {
   private sessionSecret: string;
 
   constructor() {
-    const dbPath = "./data/users.db";
+    const dbPath = getRuntimePath("data", "users.db");
     const dbDir = dirname(dbPath);
 
     if (!existsSync(dbDir)) {
@@ -380,6 +381,8 @@ class UserDatabase {
 
 export const userDatabase = new UserDatabase();
 
-setInterval(() => {
-  userDatabase.cleanExpiredSessions();
-}, 60 * 60 * 1000);
+if (!isServerlessRuntime()) {
+  setInterval(() => {
+    userDatabase.cleanExpiredSessions();
+  }, 60 * 60 * 1000);
+}

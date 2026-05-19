@@ -2,6 +2,7 @@ import { writeFile, readFile, mkdir } from "fs/promises";
 import { existsSync, readFileSync } from "fs";
 import { createRequire } from "module";
 import type { Contact } from "../types";
+import { getRuntimePath } from "../utils/runtimePaths";
 
 // Use createRequire to reliably load xlsx in ESM context
 const require = createRequire(import.meta.url);
@@ -132,7 +133,7 @@ export class FileService {
   ): Promise<string> {
     try {
       // Ensure uploads directory exists
-      const uploadDir = "./uploads";
+      const uploadDir = getRuntimePath("uploads");
       if (!existsSync(uploadDir)) {
         await mkdir(uploadDir, { recursive: true });
       }

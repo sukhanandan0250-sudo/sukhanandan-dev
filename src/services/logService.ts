@@ -2,10 +2,12 @@ import { writeFile, readFile, mkdir } from "fs/promises";
 import { existsSync } from "fs";
 import { stringify } from "csv-stringify/sync";
 import type { EmailLog } from "../types";
+import { getRuntimePath } from "../utils/runtimePaths";
 
 class LogService {
   private logs: EmailLog[] = [];
-  private logFilePath = "./logs/email-logs.json";
+  private logsDir = getRuntimePath("logs");
+  private logFilePath = getRuntimePath("logs", "email-logs.json");
 
   constructor() {
     this.initializeLogsDirectory();
@@ -13,8 +15,8 @@ class LogService {
   }
 
   private async initializeLogsDirectory() {
-    if (!existsSync("./logs")) {
-      await mkdir("./logs", { recursive: true });
+    if (!existsSync(this.logsDir)) {
+      await mkdir(this.logsDir, { recursive: true });
     }
   }
 

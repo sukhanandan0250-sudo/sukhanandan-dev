@@ -6,8 +6,6 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { serve } from "@hono/node-server";
-import { mkdir } from "fs/promises";
-import { existsSync } from "fs";
 
 // Middleware
 import { authMiddleware } from "./middleware/auth";
@@ -21,29 +19,7 @@ import dashboardRoutes from "./routes/dashboard";
 
 const app = new Hono();
 
-// ======================
-// Initialize directories
-// ======================
-
-async function initializeDirectories() {
-  const dirs = ["./uploads", "./logs", "./data"];
-
-  for (const dir of dirs) {
-    if (!existsSync(dir)) {
-      await mkdir(dir, { recursive: true });
-    }
-  }
-}
-
-// Initialize once
-initializeDirectories().catch((err) => {
-  console.error("Directory initialization failed:", err);
-});
-
-// ======================
-// Middleware
-// ======================
-
+// CORS - allow React frontend
 app.use(
   "*",
   cors({
@@ -195,7 +171,6 @@ const port = parseInt(process.env.PORT || "3000");
 
 async function main() {
   console.log("🚀 Initializing Bulk Email Sender...");
-  await initializeDirectories();
 
   console.log("\n📋 Configuration Status:");
   if (process.env.SMTP_HOST) {
