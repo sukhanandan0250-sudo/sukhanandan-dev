@@ -1,49 +1,42 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "api/index.ts",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "frontend/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
+  "functions": {
+    "api/index.js": {
+      "runtime": "@vercel/node"
     }
-  ],
-  "routes": [
+  },
+  "rewrites": [
     {
-      "src": "/auth/(.*)",
-      "dest": "api/index.ts"
+      "source": "/auth/(.*)",
+      "destination": "/api/index.js"
     },
     {
-      "src": "/send/(.*)",
-      "dest": "api/index.ts"
+      "source": "/config/(.*)",
+      "destination": "/api/index.js"
     },
     {
-      "src": "/report/(.*)",
-      "dest": "api/index.ts"
+      "source": "/send/(.*)",
+      "destination": "/api/index.js"
     },
     {
-      "src": "/config/(.*)",
-      "dest": "api/index.ts"
+      "source": "/report/(.*)",
+      "destination": "/api/index.js"
     },
     {
-      "src": "/dashboard/(.*)",
-      "dest": "api/index.ts"
+      "source": "/dashboard/(.*)",
+      "destination": "/api/index.js"
     },
     {
-      "src": "/health",
-      "dest": "api/index.ts"
+      "source": "/health",
+      "destination": "/api/index.js"
     },
     {
-      "handle": "filesystem"
+      "source": "/user/(.*)",
+      "destination": "/api/index.js"
     },
     {
-      "src": "/(.*)",
-      "dest": "/frontend/dist/index.html"
+      "source": "/(.*)",
+      "destination": "/"
     }
   ]
 }
