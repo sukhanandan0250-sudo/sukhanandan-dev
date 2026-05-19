@@ -3,7 +3,6 @@
   "version": "2.0.0",
   "description": "Bulk Email Sender Backend",
   "type": "module",
-
   "scripts": {
     "dev": "tsx watch src/app.ts",
     "build": "tsc --noEmit",
@@ -12,8 +11,8 @@
     "start": "tsx src/app.ts",
     "clean": "rimraf dist"
   },
-
   "dependencies": {
+    "@hono/node-server": "^2.0.3",
     "argon2": "^0.31.2",
     "better-sqlite3": "^12.10.0",
     "csv-stringify": "^6.4.4",
@@ -22,15 +21,12 @@
     "nodemailer": "^6.9.8",
     "xlsx": "^0.18.5"
   },
-
   "devDependencies": {
-    
     "@types/node": "^20.11.0",
     "@types/nodemailer": "^6.4.14",
     "tsx": "^4.7.0",
     "typescript": "^5.3.3"
   },
-
   "engines": {
     "node": ">=18.0.0"
   }
