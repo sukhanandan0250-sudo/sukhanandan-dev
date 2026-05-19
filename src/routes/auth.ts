@@ -6,7 +6,7 @@ import { setCookie, deleteCookie, getCookie } from "hono/cookie";
 const app = new Hono();
 
 // Register endpoint
-app.post("/auth/register", async (c) => {
+app.post("/register", async (c) => {
   try {
     const body = await c.req.json();
     const { email, name, password } = body;
@@ -34,6 +34,7 @@ app.post("/auth/register", async (c) => {
 
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
     if (!emailRegex.test(email)) {
       return c.json(
         {
@@ -45,17 +46,21 @@ app.post("/auth/register", async (c) => {
     }
 
     try {
-      const userId = await userDatabase.createUser(email, name, password);
+      const userId = await userDatabase.createUser(
+        email,
+        name,
+        password
+      );
+
       const token = await userDatabase.createSession(userId);
 
-      // Auto-detect HTTP vs HTTPS
       const isHTTPS =
         c.req.header("x-forwarded-proto") === "https" ||
         c.req.url.startsWith("https://");
 
       setCookie(c, "session_token", token, {
         httpOnly: true,
-        secure: isHTTPS, // Only secure if actually on HTTPS
+        secure: isHTTPS,
         sameSite: "lax",
         maxAge: 24 * 60 * 60,
         path: "/",
@@ -64,10 +69,17 @@ app.post("/auth/register", async (c) => {
       return c.json({
         success: true,
         message: "Account created successfully",
-        user: { id: userId, email, name },
+        user: {
+          id: userId,
+          email,
+          name,
+        },
       });
     } catch (error) {
-      if (error instanceof Error && error.message === "Email already exists") {
+      if (
+        error instanceof Error &&
+        error.message === "Email already exists"
+      ) {
         return c.json(
           {
             success: false,
@@ -76,10 +88,12 @@ app.post("/auth/register", async (c) => {
           409
         );
       }
+
       throw error;
     }
   } catch (error) {
     console.error("Registration error:", error);
+
     return c.json(
       {
         success: false,
@@ -91,7 +105,7 @@ app.post("/auth/register", async (c) => {
 });
 
 // Login endpoint
-app.post("/auth/login", async (c) => {
+app.post("/login", async (c) => {
   try {
     const body = await c.req.json();
     const { email, password } = body;
@@ -106,7 +120,11 @@ app.post("/auth/login", async (c) => {
       );
     }
 
-    const user = await userDatabase.authenticateUser(email, password);
+    const user = await userDatabase.authenticateUser(
+      email,
+      password
+    );
+
     if (!user) {
       return c.json(
         {
@@ -119,14 +137,13 @@ app.post("/auth/login", async (c) => {
 
     const token = await userDatabase.createSession(user.id);
 
-    // Auto-detect HTTP vs HTTPS
     const isHTTPS =
       c.req.header("x-forwarded-proto") === "https" ||
       c.req.url.startsWith("https://");
 
     setCookie(c, "session_token", token, {
       httpOnly: true,
-      secure: isHTTPS, // Only secure if actually on HTTPS
+      secure: isHTTPS,
       sameSite: "lax",
       maxAge: 24 * 60 * 60,
       path: "/",
@@ -143,6 +160,7 @@ app.post("/auth/login", async (c) => {
     });
   } catch (error) {
     console.error("Login error:", error);
+
     return c.json(
       {
         success: false,
@@ -154,7 +172,7 @@ app.post("/auth/login", async (c) => {
 });
 
 // Logout endpoint
-app.post("/auth/logout", async (c) => {
+app.post("/logout", async (c) => {
   try {
     const token = getCookie(c, "session_token");
 
@@ -170,6 +188,7 @@ app.post("/auth/logout", async (c) => {
     });
   } catch (error) {
     console.error("Logout error:", error);
+
     return c.json(
       {
         success: false,
@@ -181,7 +200,7 @@ app.post("/auth/logout", async (c) => {
 });
 
 // Check auth status
-app.get("/auth/me", async (c) => {
+app.get("/me", async (c) => {
   try {
     const token = getCookie(c, "session_token");
 
@@ -196,8 +215,10 @@ app.get("/auth/me", async (c) => {
     }
 
     const user = userDatabase.validateSession(token);
+
     if (!user) {
       deleteCookie(c, "session_token");
+
       return c.json(
         {
           success: false,
@@ -217,6 +238,7 @@ app.get("/auth/me", async (c) => {
     });
   } catch (error) {
     console.error("Auth check error:", error);
+
     return c.json(
       {
         success: false,
