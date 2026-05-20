@@ -10,6 +10,20 @@ import {
 
 const authRoutes = new Hono();
 
+function getSessionCookieOptions(c: any) {
+  const proto = c.req.header("x-forwarded-proto");
+  const isHttps =
+    proto === "https" || new URL(c.req.url).protocol === "https:";
+
+  return {
+    httpOnly: true,
+    secure: isHttps,
+    sameSite: isHttps ? "none" : "lax",
+    maxAge: 24 * 60 * 60,
+    path: "/",
+  } as const;
+}
+
 // ======================
 // Register
 // ======================
@@ -60,13 +74,7 @@ authRoutes.post("/register", async (c) => {
 
     const token = await userDatabase.createSession(userId);
 
-    setCookie(c, "session_token", token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      maxAge: 24 * 60 * 60,
-      path: "/",
-    });
+    setCookie(c, "session_token", token, getSessionCookieOptions(c));
 
     return c.json({
       success: true,
@@ -127,13 +135,7 @@ authRoutes.post("/login", async (c) => {
 
     const token = await userDatabase.createSession(user.id);
 
-    setCookie(c, "session_token", token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      maxAge: 24 * 60 * 60,
-      path: "/",
-    });
+    setCookie(c, "session_token", token, getSessionCookieOptions(c));
 
     return c.json({
       success: true,
