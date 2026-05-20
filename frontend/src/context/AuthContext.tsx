@@ -2,9 +2,6 @@ import { createContext, useContext, useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import axios from 'axios'
 
-
-axios.defaults.withCredentials = true
-
 interface User { id: string; email: string; name: string }
 
 interface AuthContextType {
