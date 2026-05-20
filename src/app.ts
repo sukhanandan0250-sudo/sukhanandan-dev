@@ -6,6 +6,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { serve } from "@hono/node-server";
+import { pathToFileURL } from "url";
 
 // Middleware
 import { authMiddleware } from "./middleware/auth";
@@ -40,13 +41,14 @@ app.use("*", async (c, next) => {
   const path = c.req.path;
 
   const publicPaths = [
+    "/",
     "/health",
     "/auth/login",
     "/auth/register",
   ];
 
   const isPublic = publicPaths.some((p) =>
-    path.startsWith(p)
+    p === "/" ? path === "/" : path.startsWith(p)
   );
 
   if (isPublic) {
@@ -55,16 +57,6 @@ app.use("*", async (c, next) => {
 
   return await authMiddleware(c, next);
 });
-
-// Routes
-// ======================
-
-app.route("/auth", authRoutes);
-
-app.route("/", sendRoutes);
-app.route("/", reportRoutes);
-app.route("/", configRoutes);
-app.route("/", dashboardRoutes);
 
 // ======================
 // Health Route
@@ -77,6 +69,25 @@ app.get("/health", (c) => {
     timestamp: new Date().toISOString(),
   });
 });
+
+app.get("/", (c) => {
+  return c.json({
+    success: true,
+    message: "Backend running successfully",
+    health: "/health",
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// Routes
+// ======================
+
+app.route("/auth", authRoutes);
+
+app.route("/", sendRoutes);
+app.route("/", reportRoutes);
+app.route("/", configRoutes);
+app.route("/", dashboardRoutes);
 
 // ======================
 // User Info
@@ -195,7 +206,10 @@ async function main() {
   });
 }
 
-if (!process.env.VERCEL) {
+const isDirectRun =
+  !!process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+
+if (!process.env.VERCEL && isDirectRun) {
   main().catch(console.error);
 }
 
