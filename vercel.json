@@ -3,10 +3,71 @@
   "version": 2,
   "buildCommand": "npm run vercel-build",
   "outputDirectory": "frontend/dist",
+  "functions": {
+    "api/index.ts": {
+      "maxDuration": 60
+    }
+  },
   "rewrites": [
     {
-      "source": "/(auth|config|send|report|batch-status|scheduled-jobs|dashboard|parse-excel|provider-info|health|user|test-notification|batch-pause|batch-resume|batch-cancel)(.*)",
-      "destination": "/api"
+      "source": "/auth/:path*",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/config/:path*",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/send/:path*",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/report/:path*",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/batch-status/:path*",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/scheduled-jobs/:path*",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/dashboard/:path*",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/parse-excel/:path*",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/provider-info/:path*",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/health",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/user/:path*",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/test-notification/:path*",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/batch-pause/:path*",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/batch-resume/:path*",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/batch-cancel/:path*",
+      "destination": "/api/index"
     },
     {
       "source": "/(.*)",
